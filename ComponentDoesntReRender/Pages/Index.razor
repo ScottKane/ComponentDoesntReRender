@@ -1,0 +1,24 @@
+﻿@page "/"
+
+@inject FakeData Fake 
+
+@if (_created)
+{
+    var person = Fake.People.Where(person => person.FirstName == _person.FirstName && person.LastName == _person.LastName).FirstOrDefault();
+    <div>@($"{person.FirstName} {person.LastName} added!")</div>
+}
+
+<Sample TItem="Person" Items="Fake.People" OnCreated="OnCreated"/>
+
+@code {
+    private Person _person;
+    private bool _created;
+
+    public void OnCreated(Person person)
+    {
+        _person = person;
+        _created = true;
+        Fake.People.Add(person);
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,54 @@
+﻿@using static ComponentDoesntReRender.Utilities
+
+@typeparam TItem
+
+@if (_items is not null)
+{
+    <EditForm Model="_item" OnValidSubmit="CreateItem" Context="form">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        @foreach (var (key, value) in _formProperties)
+        {
+            var property = GetPropertyFromKey(key, _item);
+            <InputText Type="text" Id="@property.Name.ToLower()" Placeholder="@property.Name" @bind-Value="_formProperties[key].Value"></InputText>
+        }
+        <button type="submit">Add</button>
+    </EditForm>
+    @foreach (var item in _items)
+    {
+        <div>
+            @foreach (var (key, value) in _properties)
+            {
+                var property = GetPropertyFromKey(key, _item);
+                <div>@($"{property.Name}: {item[key]}")</div>
+            }
+        </div>
+        <br />
+    }
+}
+
+@code {
+    [Parameter] public IList<TItem> Items { get; set; }
+    [Parameter] public EventCallback<TItem> OnCreated { get; set; }
+
+    private TItem _item;
+    private IList<Dictionary<string, object>> _items;
+    private Dictionary<string, object> _properties;
+    private Dictionary<string, FormResponse> _formProperties;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _item = CreateDefaultItem<TItem>();
+        _items = new List<Dictionary<string, object>>();
+        foreach (var item in Items) _items.Add(GetItemProperties(item));
+        _properties = GetItemProperties(_item);
+        _formProperties = GetFormItemProperties(_properties);
+    }
+
+    private async Task CreateItem()
+    {
+        _item = CreateFormItem<TItem>(_formProperties);
+        await OnCreated.InvokeAsync(_item);
+    }
+}
