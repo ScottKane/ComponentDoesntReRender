@@ -36,14 +36,17 @@
     private Dictionary<string, object> _properties;
     private Dictionary<string, FormResponse> _formProperties;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
         _item = CreateDefaultItem<TItem>();
-        _items = new List<Dictionary<string, object>>();
-        foreach (var item in Items) _items.Add(GetItemProperties(item));
         _properties = GetItemProperties(_item);
         _formProperties = GetFormItemProperties(_properties);
+    }
+
+    protected override void OnParametersSet()
+    {
+        _items = new List<Dictionary<string, object>>();
+        foreach (var item in Items) _items.Add(GetItemProperties(item));
     }
 
     private async Task CreateItem()
